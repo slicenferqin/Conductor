@@ -68,10 +68,11 @@ class ClaudeCodeCLI:
         self,
         prompt: str,
         session_id: str | None = None,
+        allowed_tools: list[str] | None = None,
     ) -> list[ClaudeMessage]:
         """Execute a prompt and wait for completion."""
         messages = []
-        async for msg in self.execute(prompt, session_id):
+        async for msg in self.execute(prompt, session_id, allowed_tools):
             messages.append(msg)
         return messages
 
