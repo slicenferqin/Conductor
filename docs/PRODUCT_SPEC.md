@@ -286,11 +286,151 @@ class AutonomousLoop:
 | 工具 | 作用 | Conductor 如何使用 |
 |------|------|-------------------|
 | **Claude Code** | 代码执行 | 核心执行引擎 |
-| **Beads** | 任务记忆 | 跨会话状态持久化 |
-| **Agent Mail** | Agent 通信 | 多角色协作时使用 |
-| **OpenSkills** | 技能加载 | 角色专业知识 |
+| **Beads** | 任务记忆 | 跨会话状态持久化（后续引入） |
+| **Agent Mail** | Agent 通信 | 多角色协作时使用（后续引入） |
+| **OpenSkills** | 技能加载 | 角色专业知识（后续引入） |
 
 **Conductor 的定位**：整合者 + 产品化 + 自治循环
+
+## 与 claude-code-bot 集成
+
+### 背景
+
+[claude-code-bot](https://github.com/slicenferqin/claude-code-bot) 是一个飞书机器人，支持：
+- 飞书 WebSocket 长连接（双向通信）
+- 接收用户消息并执行 Claude Code 任务
+- 支持命令交互（ok/no/cancel/diff/commit 等）
+
+**问题**：普通的 Webhook 通知只能单向推送，无法接收用户回复（如 Plan 确认）。
+
+### 集成方案：claude-code-bot 作为入口
+
+```
+用户 → 飞书 → claude-code-bot → 判断任务复杂度
+                    │
+           ┌───────┴───────┐
+           ↓               ↓
+      简单任务          复杂任务
+           │               │
+           ↓               ↓
+    直接执行          conductor.execute()
+           │               │
+           ↓               ↓
+           └───────┬───────┘
+                   ↓
+             结果返回飞书
+```
+
+### 职责划分
+
+| 组件 | 职责 |
+|------|------|
+| **claude-code-bot** | 飞书通信、任务分发、用户交互 |
+| **Conductor** | 复杂任务执行、自治循环、进度管理 |
+
+### 接口设计
+
+```python
+# claude-code-bot 调用 Conductor
+
+class ConductorClient:
+    """Conductor 客户端，供 claude-code-bot 调用"""
+
+    async def execute(
+        self,
+        requirement: str,
+        on_plan_ready: Callable[[Plan], Awaitable[bool]],  # Plan 确认回调
+        on_progress: Callable[[Progress], None],           # 进度更新回调
+        on_need_help: Callable[[HelpRequest], Awaitable[str]],  # 需要帮助回调
+    ) -> ExecutionResult:
+        """执行复杂任务
+
+        Args:
+            requirement: 需求描述
+            on_plan_ready: Plan 生成后的回调，返回 True 确认，False 取消
+            on_progress: 进度更新回调
+            on_need_help: 需要人工介入时的回调
+
+        Returns:
+            执行结果
+        """
+        pass
+```
+
+```python
+# claude-code-bot 中的使用
+
+class Bot:
+    async def handle_task(self, prompt: str, chat_id: str):
+        if self.is_complex_task(prompt):
+            # 复杂任务交给 Conductor
+            result = await self.conductor.execute(
+                requirement=prompt,
+                on_plan_ready=lambda plan: self.request_confirm(chat_id, plan),
+                on_progress=lambda p: self.send_progress(chat_id, p),
+                on_need_help=lambda h: self.request_help(chat_id, h),
+            )
+        else:
+            # 简单任务直接执行
+            result = await self.claude_cli.execute(prompt)
+
+        self.send_to_feishu(chat_id, result)
+
+    def is_complex_task(self, prompt: str) -> bool:
+        """判断是否为复杂任务
+
+        复杂任务特征：
+        - 包含"项目"、"应用"、"系统"等关键词
+        - 需要多个文件/模块
+        - 需要前后端配合
+        """
+        complex_keywords = ["项目", "应用", "系统", "网站", "APP", "小程序"]
+        return any(kw in prompt for kw in complex_keywords)
+```
+
+### 通信流程
+
+```
+1. 用户在飞书发送: "做一个待办清单应用"
+
+2. claude-code-bot 判断为复杂任务，调用 Conductor
+
+3. Conductor 生成 Plan，通过回调通知 claude-code-bot
+
+4. claude-code-bot 将 Plan 发送到飞书，等待用户确认
+
+5. 用户回复 "ok"
+
+6. claude-code-bot 通过回调告知 Conductor 继续执行
+
+7. Conductor 执行各阶段，定期通过回调更新进度
+
+8. claude-code-bot 将进度推送到飞书
+
+9. 完成后，Conductor 通过回调返回结果
+
+10. claude-code-bot 将结果发送到飞书
+```
+
+### MVP 简化方案
+
+初期可以不改造 claude-code-bot，Conductor 独立运行：
+
+```
+方案 A（完整集成）：
+  飞书 ↔ claude-code-bot ↔ Conductor
+
+方案 B（MVP 简化）：
+  CLI → Conductor（本地执行）
+  飞书 ← Conductor（单向通知）
+
+  Plan 确认通过 CLI 交互：
+  $ conductor submit "待办清单"
+  [显示 Plan]
+  确认执行? [y/n]: y
+```
+
+后续再实现 claude-code-bot 完整集成。
 
 ## MVP 范围
 
