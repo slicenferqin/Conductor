@@ -1,8 +1,8 @@
 """Task Executor - Orchestrates Claude Code sessions with autonomous loop."""
 
 import asyncio
+import uuid
 from dataclasses import dataclass
-from datetime import datetime
 from enum import Enum
 from typing import Any, Callable
 
@@ -214,8 +214,8 @@ class TaskExecutor:
         Returns:
             List of stage results
         """
-        # Generate a session ID for this execution
-        self._session_id = f"conductor-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        # Generate a valid UUID session ID for this execution
+        self._session_id = str(uuid.uuid4())
 
         results: list[StageResult] = []
         stages = [s["name"] for s in plan.stages]
