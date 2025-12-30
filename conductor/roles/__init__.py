@@ -1,0 +1,1 @@
+"""Conductor Roles - Role definitions for AI agents."""
