@@ -341,10 +341,20 @@ class TaskExecutor:
 
     async def _execute_claude(self, prompt: str) -> list[Any]:
         """Execute a prompt with Claude."""
-        return await self.claude.execute_and_wait(
+        messages = await self.claude.execute_and_wait(
             prompt=prompt,
             session_id=self._session_id,
         )
+
+        if not messages:
+            raise RuntimeError("Claude CLI 未返回任何结果，请检查 claude 命令是否可用")
+
+        # Check for errors in result
+        for msg in messages:
+            if msg.type == "result" and msg.content.get("is_error"):
+                raise RuntimeError(f"Claude 执行出错: {msg.content.get('result', '未知错误')}")
+
+        return messages
 
     async def _run_tests(self) -> dict[str, Any]:
         """Run tests and return results."""
@@ -352,6 +362,9 @@ class TaskExecutor:
             prompt=TEST_PROMPT,
             session_id=self._session_id,
         )
+
+        if not messages:
+            return {"passed": False, "error": "Claude CLI 未返回任何结果"}
 
         # Parse test results from messages
         for msg in reversed(messages):
@@ -362,7 +375,7 @@ class TaskExecutor:
                     return {"passed": False, "error": result_text}
                 return {"passed": True}
 
-        return {"passed": True}
+        return {"passed": False, "error": "未找到测试结果"}
 
     async def _auto_fix(self, error: str) -> None:
         """Attempt to automatically fix an error."""
