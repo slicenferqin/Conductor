@@ -1,501 +1,470 @@
 # Conductor 产品规划
 
-> 把 AI 开发从"同步交互"变成"异步托管"
+> 你的 AI 团队，一人公司的标配
 
 ## 一句话定义
 
-**Conductor** - 提交需求，后台自动开发，完成后通知你。
+**Conductor** - 一个 AI 团队协作平台，像管理真实团队一样管理 AI agents。
 
-## 核心痛点
+## 产品定位
 
-现在让 AI 做项目（APP、小程序、网站）的体验：
+### 目标用户
+- 独立开发者 / 一人公司
+- 想要 AI 帮忙但不想一直盯着的人
+- 需要多角色协作完成复杂任务的人
 
-| 痛点 | 描述 |
-|------|------|
-| 要等待 | AI 在跑，你得盯着 |
-| 要交互 | 每一步都问你，要不要继续 |
-| 要跟踪 | 做到哪了？什么状态？ |
-| 要测试 | 做完了你得手动测 |
-| 要反馈 | 发现问题得告诉它 |
-| 要修复 | 来回改好几轮 |
-| 离开就停 | 关电脑 = 进度停止 |
+### 核心价值
+| 传统 AI 助手 | Conductor |
+|-------------|-----------|
+| 一问一答 | 团队协作 |
+| 单一角色 | 动态组队 |
+| 同步等待 | 异步执行 |
+| 手动跟踪 | 群聊可视 |
 
-**本质问题**：AI 开发是"同步阻塞"的，人必须在场。
+## 产品形态：AI 协作群聊
 
-## 解决方案
+### 核心隐喻
+把 AI 多 agent 协作，映射成大家熟悉的 **群聊** 体验：
 
-### 异步托管模式
+| 群聊概念 | AI 协作映射 |
+|---------|-----------|
+| 群聊 | 项目工作区 |
+| 群成员 | AI agents (各有角色) |
+| 群公告 | 项目需求 & 团队信息 |
+| @某人 | agent 间定向通信 |
+| 群消息 | 协作过程可视化 |
 
-```
-现在:
-  你在电脑前 → AI 工作
-  你离开电脑 → AI 停止
-
-Conductor:
-  提交需求 → 后台持续运行 → 手机收到通知 → 随时查看进度
-            ↑
-       不管你在不在电脑前
-```
-
-### 关键能力
-
-| 能力 | 说明 |
-|------|------|
-| 后台运行 | 不依赖终端会话，7x24 执行 |
-| 自治循环 | 自动测试、发现问题、修复、再测试 |
-| 关键检查点 | Plan 确认、交付验收，避免跑偏 |
-| 多端通知 | 微信/飞书/邮件，随时知道进度 |
-| 断点恢复 | 任务可暂停、可恢复 |
-
-## 用户体验
-
-### 提交任务
-
-```bash
-$ conductor submit "做一个待办清单，支持用户登录和任务增删改查"
-
-📋 任务已创建: task-20241230-001
-📝 正在生成 Plan，完成后推送到你的微信等待确认
-```
-
-### Plan 确认（手机）
+### 用户体验流程
 
 ```
-🔔 Conductor: Plan 待确认
-
-待办清单应用 计划:
-━━━━━━━━━━━━━━━━━━━━━━
-功能:
-  ✓ 用户注册/登录 (JWT)
-  ✓ 任务增删改查
-  ✓ 任务标记完成/未完成
-  ✓ 按创建时间排序
-
-技术栈:
-  后端: FastAPI + SQLAlchemy + PostgreSQL
-  前端: React + TypeScript + TailwindCSS
-
-预计: 15-20 分钟
-预估 Token: ~50k
-
-[✅ 确认开始] [✏️ 我要调整] [❌ 取消]
+┌─────────────────────────────────────────────────────────┐
+│  📱 Conductor                              [+ 新项目]    │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  👤 我: 帮我做个待办清单应用，支持登录和增删改查          │
+│                                                         │
+│  🤖 秘书: 好的，我来分析需求并组建团队...                │
+│                                                         │
+│  🤖 秘书: 团队已就绪！                                   │
+│       ┌────────────────────────────────┐               │
+│       │ 📋 项目: 待办清单应用           │               │
+│       │                                │               │
+│       │ 👥 团队成员:                    │               │
+│       │   🎯 PM - 产品规划              │               │
+│       │   🏗️ Architect - 架构设计       │               │
+│       │   💻 Backend - 后端开发         │               │
+│       │   🎨 Frontend - 前端开发        │               │
+│       │   🧪 Tester - 测试验证          │               │
+│       │                                │               │
+│       │ 需求已同步，开始执行？           │               │
+│       │ [✅ 开始] [✏️ 调整团队]          │               │
+│       └────────────────────────────────┘               │
+│                                                         │
+│  👤 我: 开始                                            │
+│                                                         │
+│  🎯 PM: 我来梳理产品需求，输出 PRD...                    │
+│                                                         │
+│  🎯 PM: PRD 已完成 → docs/prd.md                        │
+│         @Architect @Backend @Frontend 请查收            │
+│                                                         │
+│  🏗️ Architect: 收到，我来设计系统架构...                 │
+│                                                         │
+│  💻 Backend: @Architect 架构设计好了吗？                 │
+│              我准备开始写 API 了                         │
+│                                                         │
+│  🏗️ Architect: 好了！架构文档 → docs/architecture.md    │
+│                API 设计 → docs/api_design.md            │
+│                @Backend @Frontend 可以开工了             │
+│                                                         │
+│  💻 Backend: 开始实现后端 API...                        │
+│                                                         │
+│  🎨 Frontend: 同步开始搭建前端框架...                    │
+│                                                         │
+│  💻 Backend: 后端完成！8 个 API 接口已就绪               │
+│              @Frontend API 地址: http://localhost:8000   │
+│              @Tester 可以开始测试了                      │
+│                                                         │
+│  🎨 Frontend: 前端完成！正在对接后端 API...              │
+│                                                         │
+│  🧪 Tester: 开始跑测试...                               │
+│             ❌ 发现 2 个问题:                            │
+│             1. 登录接口返回格式不对                      │
+│             2. CORS 配置缺失                            │
+│             @Backend 请修复                             │
+│                                                         │
+│  💻 Backend: 收到，修复中...                            │
+│              ✅ 已修复，@Tester 请重新测试               │
+│                                                         │
+│  🧪 Tester: ✅ 全部测试通过！23/23                      │
+│                                                         │
+│  🤖 秘书: 🎉 项目完成！                                  │
+│       ┌────────────────────────────────┐               │
+│       │ ✅ 待办清单应用 已交付          │               │
+│       │                                │               │
+│       │ 📦 产出:                        │               │
+│       │   • 后端: 8 个 API              │               │
+│       │   • 前端: 5 个页面              │               │
+│       │   • 测试: 23 个用例全部通过     │               │
+│       │   • 文档: PRD + 架构 + API      │               │
+│       │                                │               │
+│       │ 🚀 启动: docker-compose up      │               │
+│       │                                │               │
+│       │ [📥 下载代码] [👀 预览]          │               │
+│       └────────────────────────────────┘               │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
 ```
 
-### 执行中（可选查看）
+### 不同任务，不同团队
 
-```
-🔔 Conductor: 进度更新
+| 需求 | 秘书组建的团队 |
+|------|--------------|
+| "做一个待办清单应用" | PM + Architect + Backend + Frontend + Tester |
+| "调研一下 OpenAI 这家公司" | Researcher (1人即可) |
+| "分析最近的 AI 舆论趋势" | Researcher + Analyst |
+| "帮我写一份技术方案" | Architect + Writer |
+| "Review 这段代码" | CodeReviewer (1人即可) |
 
-待办清单应用
-━━━━━━━━━━━━━━━━━━━━━━
-[=====>    ] 50%
-
-✅ Plan 已确认
-✅ 设计完成
-🔄 后端开发中 (5/8 接口)
-⏳ 前端开发
-⏳ 测试验证
-
-预计剩余: 8 分钟
-```
-
-### 完成通知
-
-```
-🎉 Conductor: 任务完成！
-
-待办清单应用 已交付
-━━━━━━━━━━━━━━━━━━━━━━
-✅ 后端: 8 个 API 接口
-✅ 前端: 5 个页面
-✅ 测试: 23/23 通过
-✅ 文档: PRD + 架构设计 + API 文档
-
-📦 获取代码: conductor pull task-20241230-001
-🌐 预览: http://localhost:3000 (docker-compose up)
-
-[👀 查看详情] [📥 下载代码]
-```
-
-### 需要帮助时
-
-```
-⚠️ Conductor: 需要你的帮助
-
-任务: 待办清单应用
-阶段: 前端开发
-问题: 自动修复 3 次仍失败
-
-错误摘要:
-  登录接口 CORS 错误，后端配置问题...
-
-[🔧 我来介入] [🤖 继续尝试] [⏸️ 暂停任务]
-```
-
-## 检查点设计
-
-```
-┌─────────────────────────────────────┐
-│ Plan [必须确认]                      │
-│ 确保方向正确，避免白跑               │
-└──────────────┬──────────────────────┘
-               ↓ 确认后自动执行
-┌─────────────────────────────────────┐
-│ 设计 [自动]                          │
-│ PRD、架构、API、数据库设计            │
-└──────────────┬──────────────────────┘
-               ↓
-┌─────────────────────────────────────┐
-│ 开发 [自动 + 自治循环]               │
-│ 生成 → 测试 → 修复 → 重测            │
-│ 最多自动修复 N 次                    │
-└──────────────┬──────────────────────┘
-               ↓
-┌─────────────────────────────────────┐
-│ 交付 [必须验收]                      │
-│ 最终把关                            │
-└─────────────────────────────────────┘
-```
-
-### 检查点配置
-
-```yaml
-checkpoints:
-  plan:
-    mode: required          # 必须人工确认
-    timeout: 30m            # 30分钟未确认则提醒
-
-  design:
-    mode: auto              # 自动执行
-    notify: false           # 不单独通知
-
-  development:
-    mode: auto              # 自动执行
-    max_fix_attempts: 3     # 最多自动修复 3 次
-    notify_on_stuck: true   # 卡住时通知
-
-  delivery:
-    mode: required          # 必须人工验收
-```
+**关键**：团队组成是 **动态的**，由秘书根据需求智能决定。
 
 ## 技术架构
 
 ### 整体架构
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Conductor Server                      │
-│                    (后台服务, 7x24)                       │
-├─────────────────────────────────────────────────────────┤
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐ │
-│  │ 任务队列  │→│ 执行引擎  │→│ 自治循环  │→│ 通知服务 │ │
-│  └──────────┘  └──────────┘  └──────────┘  └─────────┘ │
-└───────────────────────┬─────────────────────────────────┘
-                        │
-        ┌───────────────┼───────────────┐
-        ↓               ↓               ↓
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│  OpenSkills  │ │    Beads     │ │  Agent Mail  │
-│  技能加载     │ │   任务记忆    │ │  Agent 通信  │
-└──────────────┘ └──────────────┘ └──────────────┘
-        │               │               │
-        └───────────────┼───────────────┘
-                        ↓
-                ┌──────────────┐
-                │ Claude Code  │
-                │   执行引擎    │
-                └──────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                      Web App (React)                        │
+│  ┌─────────────┐  ┌─────────────────────────────────────┐  │
+│  │ 项目列表    │  │           群聊界面                   │  │
+│  │             │  │  • 消息流 (实时)                     │  │
+│  │ • 待办应用  │  │  • @提及高亮                        │  │
+│  │ • 调研报告  │  │  • 文件预览                         │  │
+│  │ • ...      │  │  • 成员列表 & 状态                   │  │
+│  └─────────────┘  └─────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                              ↓ WebSocket (实时消息)
+┌─────────────────────────────────────────────────────────────┐
+│                    Backend (FastAPI)                        │
+│                                                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │ 项目管理     │  │ 消息系统     │  │ 文件服务     │      │
+│  │ • CRUD      │  │ • 路由       │  │ • 上传下载    │      │
+│  │ • 状态同步   │  │ • 广播       │  │ • 预览       │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+│                                                             │
+│  ┌──────────────────────────────────────────────────┐      │
+│  │              Agent 编排引擎                       │      │
+│  │  • 需求分析 → 团队组建                            │      │
+│  │  • Session 生命周期管理                           │      │
+│  │  • Agent 间消息路由                               │      │
+│  └──────────────────────────────────────────────────┘      │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    Agent Layer                              │
+│                                                             │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
+│  │ Agent 1  │  │ Agent 2  │  │ Agent 3  │  │ Agent N  │   │
+│  │ (PM)     │  │(Backend) │  │(Frontend)│  │  (...)   │   │
+│  │          │  │          │  │          │  │          │   │
+│  │ Claude   │  │ Claude   │  │ Claude   │  │ Claude   │   │
+│  │ Session  │  │ Session  │  │ Session  │  │ Session  │   │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
+│       ↑              ↑              ↑              ↑        │
+│       └──────────────┴──────────────┴──────────────┘        │
+│                    消息总线 / 文件系统                        │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### 目录结构
+### 核心概念
+
+#### Project (项目)
+```typescript
+interface Project {
+  id: string;
+  name: string;
+  requirement: string;      // 原始需求
+  workspace: string;        // 工作目录路径
+  status: 'planning' | 'running' | 'paused' | 'completed' | 'failed';
+  team: TeamMember[];       // 团队成员
+  createdAt: Date;
+}
+```
+
+#### TeamMember (团队成员/Agent)
+```typescript
+interface TeamMember {
+  id: string;
+  role: string;             // PM, Backend, Frontend, Researcher, etc.
+  name: string;             // 显示名称
+  avatar: string;           // 头像 (emoji 或图片)
+  sessionId: string;        // Claude CLI session ID
+  status: 'idle' | 'working' | 'waiting' | 'done';
+}
+```
+
+#### Message (消息)
+```typescript
+interface Message {
+  id: string;
+  projectId: string;
+  from: string;             // agent id 或 'user' 或 'system'
+  content: string;
+  mentions: string[];       // @提及的 agent ids
+  attachments: Attachment[]; // 文件附件
+  timestamp: Date;
+}
+```
+
+### Agent 通信机制
+
+#### 方案：消息总线 + 文件系统
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Message Bus                          │
+│  • 广播消息给所有 agents                                 │
+│  • 定向消息给特定 agent (@提及)                          │
+│  • 消息持久化 (SQLite/PostgreSQL)                       │
+└─────────────────────────────────────────────────────────┘
+        ↓                    ↓                    ↓
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│   Agent A    │    │   Agent B    │    │   Agent C    │
+│              │    │              │    │              │
+│ 1. 收到消息  │    │ 1. 收到消息  │    │ 1. 收到消息  │
+│ 2. 处理任务  │    │ 2. 处理任务  │    │ 2. 处理任务  │
+│ 3. 写文件    │    │ 3. 写文件    │    │ 3. 写文件    │
+│ 4. 发消息    │    │ 4. 发消息    │    │ 4. 发消息    │
+└──────────────┘    └──────────────┘    └──────────────┘
+        ↓                    ↓                    ↓
+┌─────────────────────────────────────────────────────────┐
+│                   Workspace (文件系统)                   │
+│  workspace/                                             │
+│  ├── docs/           # 文档产出                         │
+│  ├── backend/        # 后端代码                         │
+│  ├── frontend/       # 前端代码                         │
+│  └── .conductor/     # 元数据                           │
+│      ├── team.json   # 团队信息                         │
+│      └── messages/   # 消息备份                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+#### Agent 执行循环
+
+```python
+class Agent:
+    """单个 AI Agent"""
+
+    def __init__(self, role: str, session_id: str, workspace: str):
+        self.role = role
+        self.session_id = session_id
+        self.workspace = workspace
+        self.claude = ClaudeCodeCLI(workspace)
+
+    async def run(self, initial_task: str):
+        """Agent 主循环"""
+        # 1. 执行初始任务
+        await self.execute_task(initial_task)
+
+        # 2. 监听消息
+        while True:
+            messages = await self.receive_messages()
+            for msg in messages:
+                if self.is_relevant(msg):  # 是否与我相关 (@我 或 广播)
+                    response = await self.handle_message(msg)
+                    if response:
+                        await self.send_message(response)
+
+    async def execute_task(self, task: str):
+        """执行任务并产出结果"""
+        prompt = self.build_prompt(task)
+        result = await self.claude.execute(prompt)
+        return result
+
+    async def send_message(self, content: str, mentions: list[str] = None):
+        """发送消息到群里"""
+        await message_bus.publish(Message(
+            from_=self.id,
+            content=content,
+            mentions=mentions or [],
+        ))
+```
+
+### 秘书 (Conductor) 角色
+
+秘书是特殊的 agent，负责：
+1. **需求分析**：理解用户需求
+2. **团队组建**：决定需要哪些角色
+3. **任务分配**：将需求拆解并分配
+4. **进度监控**：跟踪各 agent 状态
+5. **结果汇总**：项目完成后总结
+
+```python
+class Secretary:
+    """秘书 - 项目协调者"""
+
+    async def handle_requirement(self, requirement: str) -> Project:
+        """处理用户需求"""
+
+        # 1. 分析需求，决定团队组成
+        team_config = await self.analyze_requirement(requirement)
+
+        # 2. 创建项目和工作空间
+        project = await self.create_project(requirement, team_config)
+
+        # 3. 创建各个 agent session
+        for role in team_config.roles:
+            agent = await self.create_agent(role, project.workspace)
+            project.team.append(agent)
+
+        # 4. 广播团队信息
+        await self.broadcast_team_info(project)
+
+        # 5. 启动第一个任务
+        await self.kickoff(project)
+
+        return project
+
+    async def analyze_requirement(self, requirement: str) -> TeamConfig:
+        """分析需求，决定团队组成"""
+        prompt = f"""
+        分析以下需求，决定需要哪些角色来完成：
+
+        需求：{requirement}
+
+        可用角色：
+        - PM: 产品经理，负责需求分析和 PRD
+        - Architect: 架构师，负责技术方案设计
+        - Backend: 后端开发，负责 API 和数据库
+        - Frontend: 前端开发，负责 UI 和交互
+        - Tester: 测试工程师，负责测试验证
+        - Researcher: 调研员，负责信息收集
+        - Analyst: 分析师，负责数据分析
+        - Writer: 撰稿人，负责文档撰写
+
+        返回 JSON：
+        {{
+            "roles": ["PM", "Backend", ...],
+            "reason": "为什么选择这些角色"
+        }}
+        """
+        # 调用 Claude 分析
+        result = await self.claude.execute(prompt)
+        return TeamConfig.parse(result)
+```
+
+## 目录结构
 
 ```
 conductor/
-├── server/                     # 后台服务
-│   ├── main.py                 # FastAPI 入口
-│   ├── api/                    # REST API
-│   │   ├── tasks.py            # 任务管理
-│   │   └── progress.py         # 进度查询
+├── web/                        # Web 前端 (React)
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── ProjectList/    # 项目列表
+│   │   │   ├── ChatRoom/       # 群聊界面
+│   │   │   ├── MessageList/    # 消息列表
+│   │   │   ├── MemberList/     # 成员列表
+│   │   │   └── FilePreview/    # 文件预览
+│   │   ├── stores/             # Zustand 状态
+│   │   ├── services/           # API 调用
+│   │   └── App.tsx
+│   └── package.json
+│
+├── conductor/                  # Python 后端
+│   ├── api/                    # FastAPI 路由
+│   │   ├── projects.py         # 项目 CRUD
+│   │   ├── messages.py         # 消息接口
+│   │   └── websocket.py        # WebSocket
+│   │
 │   ├── core/
-│   │   ├── task_queue.py       # 任务队列
-│   │   ├── executor.py         # 执行引擎
-│   │   ├── decomposer.py       # 任务分解
-│   │   └── auto_fix.py         # 自动修复
-│   ├── notifications/          # 通知服务
-│   │   ├── wechat.py           # 微信通知
-│   │   ├── feishu.py           # 飞书通知
-│   │   └── email.py            # 邮件通知
-│   └── integrations/           # 外部集成
-│       ├── claude_cli.py       # Claude Code
-│       ├── beads.py            # Beads 记忆
-│       ├── openskills.py       # OpenSkills
-│       └── agent_mail.py       # Agent Mail
+│   │   ├── secretary.py        # 秘书 (协调者)
+│   │   ├── agent.py            # Agent 基类
+│   │   ├── message_bus.py      # 消息总线
+│   │   └── project.py          # 项目管理
+│   │
+│   ├── agents/                 # Agent 角色定义
+│   │   ├── pm.py
+│   │   ├── architect.py
+│   │   ├── backend.py
+│   │   ├── frontend.py
+│   │   ├── tester.py
+│   │   ├── researcher.py
+│   │   └── writer.py
+│   │
+│   ├── integrations/
+│   │   ├── claude_cli.py       # Claude Code CLI
+│   │   └── agent_mail.py       # MCP Agent Mail (可选)
+│   │
+│   └── main.py                 # 入口
 │
-├── cli/                        # 命令行客户端
-│   └── main.py                 # conductor submit/status/pull
+├── docs/
+│   └── PRODUCT_SPEC.md         # 本文档
 │
-├── web/                        # Web 界面 (Phase 2)
-│   └── ...
-│
-├── roles/                      # 角色配置
-│   ├── pm.yaml
-│   ├── architect.yaml
-│   ├── backend.yaml
-│   ├── frontend.yaml
-│   └── tester.yaml
-│
-└── templates/                  # 项目模板
-    ├── fullstack-react-fastapi/
-    └── ...
+└── pyproject.toml
 ```
-
-### 自治循环
-
-```python
-class AutonomousLoop:
-    """自治循环：测试 → 分析 → 修复 → 重测"""
-
-    def __init__(self, max_attempts: int = 3):
-        self.max_attempts = max_attempts
-        self.attempt = 0
-
-    async def run(self, stage: Stage) -> Result:
-        while self.attempt < self.max_attempts:
-            # 1. 执行当前阶段
-            result = await stage.execute()
-
-            # 2. 运行测试
-            test_result = await self.run_tests()
-
-            if test_result.passed:
-                return Result.success(result)
-
-            # 3. 分析错误
-            analysis = await self.analyze_failure(test_result)
-
-            # 4. 自动修复
-            await self.auto_fix(analysis)
-            self.attempt += 1
-
-        # 超过重试次数，请求人工介入
-        return Result.need_help(test_result)
-```
-
-## 与现有工具的关系
-
-| 工具 | 作用 | Conductor 如何使用 |
-|------|------|-------------------|
-| **Claude Code** | 代码执行 | 核心执行引擎 |
-| **Beads** | 任务记忆 | 跨会话状态持久化（后续引入） |
-| **Agent Mail** | Agent 通信 | 多角色协作时使用（后续引入） |
-| **OpenSkills** | 技能加载 | 角色专业知识（后续引入） |
-
-**Conductor 的定位**：整合者 + 产品化 + 自治循环
-
-## 与 claude-code-bot 集成
-
-### 背景
-
-[claude-code-bot](https://github.com/slicenferqin/claude-code-bot) 是一个飞书机器人，支持：
-- 飞书 WebSocket 长连接（双向通信）
-- 接收用户消息并执行 Claude Code 任务
-- 支持命令交互（ok/no/cancel/diff/commit 等）
-
-**问题**：普通的 Webhook 通知只能单向推送，无法接收用户回复（如 Plan 确认）。
-
-### 集成方案：claude-code-bot 作为入口
-
-```
-用户 → 飞书 → claude-code-bot → 判断任务复杂度
-                    │
-           ┌───────┴───────┐
-           ↓               ↓
-      简单任务          复杂任务
-           │               │
-           ↓               ↓
-    直接执行          conductor.execute()
-           │               │
-           ↓               ↓
-           └───────┬───────┘
-                   ↓
-             结果返回飞书
-```
-
-### 职责划分
-
-| 组件 | 职责 |
-|------|------|
-| **claude-code-bot** | 飞书通信、任务分发、用户交互 |
-| **Conductor** | 复杂任务执行、自治循环、进度管理 |
-
-### 接口设计
-
-```python
-# claude-code-bot 调用 Conductor
-
-class ConductorClient:
-    """Conductor 客户端，供 claude-code-bot 调用"""
-
-    async def execute(
-        self,
-        requirement: str,
-        on_plan_ready: Callable[[Plan], Awaitable[bool]],  # Plan 确认回调
-        on_progress: Callable[[Progress], None],           # 进度更新回调
-        on_need_help: Callable[[HelpRequest], Awaitable[str]],  # 需要帮助回调
-    ) -> ExecutionResult:
-        """执行复杂任务
-
-        Args:
-            requirement: 需求描述
-            on_plan_ready: Plan 生成后的回调，返回 True 确认，False 取消
-            on_progress: 进度更新回调
-            on_need_help: 需要人工介入时的回调
-
-        Returns:
-            执行结果
-        """
-        pass
-```
-
-```python
-# claude-code-bot 中的使用
-
-class Bot:
-    async def handle_task(self, prompt: str, chat_id: str):
-        if self.is_complex_task(prompt):
-            # 复杂任务交给 Conductor
-            result = await self.conductor.execute(
-                requirement=prompt,
-                on_plan_ready=lambda plan: self.request_confirm(chat_id, plan),
-                on_progress=lambda p: self.send_progress(chat_id, p),
-                on_need_help=lambda h: self.request_help(chat_id, h),
-            )
-        else:
-            # 简单任务直接执行
-            result = await self.claude_cli.execute(prompt)
-
-        self.send_to_feishu(chat_id, result)
-
-    def is_complex_task(self, prompt: str) -> bool:
-        """判断是否为复杂任务
-
-        复杂任务特征：
-        - 包含"项目"、"应用"、"系统"等关键词
-        - 需要多个文件/模块
-        - 需要前后端配合
-        """
-        complex_keywords = ["项目", "应用", "系统", "网站", "APP", "小程序"]
-        return any(kw in prompt for kw in complex_keywords)
-```
-
-### 通信流程
-
-```
-1. 用户在飞书发送: "做一个待办清单应用"
-
-2. claude-code-bot 判断为复杂任务，调用 Conductor
-
-3. Conductor 生成 Plan，通过回调通知 claude-code-bot
-
-4. claude-code-bot 将 Plan 发送到飞书，等待用户确认
-
-5. 用户回复 "ok"
-
-6. claude-code-bot 通过回调告知 Conductor 继续执行
-
-7. Conductor 执行各阶段，定期通过回调更新进度
-
-8. claude-code-bot 将进度推送到飞书
-
-9. 完成后，Conductor 通过回调返回结果
-
-10. claude-code-bot 将结果发送到飞书
-```
-
-### MVP 简化方案
-
-初期可以不改造 claude-code-bot，Conductor 独立运行：
-
-```
-方案 A（完整集成）：
-  飞书 ↔ claude-code-bot ↔ Conductor
-
-方案 B（MVP 简化）：
-  CLI → Conductor（本地执行）
-  飞书 ← Conductor（单向通知）
-
-  Plan 确认通过 CLI 交互：
-  $ conductor submit "待办清单"
-  [显示 Plan]
-  确认执行? [y/n]: y
-```
-
-后续再实现 claude-code-bot 完整集成。
 
 ## MVP 范围
 
-### 包含
+### Phase 1: 核心功能 (当前)
 
-- [x] 后台服务（daemon 模式）
-- [x] CLI 客户端（submit/status/pull）
-- [x] Plan 检查点（必须确认）
-- [x] 自治循环（测试 → 修复）
-- [x] 微信通知（或飞书）
-- [x] 单一技术栈：Python + React + PostgreSQL
+**目标**：可以跑通一个完整的多 agent 协作流程
 
-### 不包含（后续迭代）
+- [ ] Web 界面基础框架
+  - [ ] 项目列表页
+  - [ ] 群聊界面 (消息流 + 成员列表)
+- [ ] 后端 API
+  - [ ] 项目 CRUD
+  - [ ] WebSocket 实时消息
+- [ ] Agent 编排
+  - [ ] 秘书：需求分析 + 团队组建
+  - [ ] Agent 创建和 Session 管理
+  - [ ] 消息路由 (@提及)
+- [ ] 基础角色
+  - [ ] PM
+  - [ ] Backend
+  - [ ] Frontend
+  - [ ] Tester
 
-- [ ] Web 界面
-- [ ] 多技术栈支持
+### Phase 2: 体验优化
+
+- [ ] 更多角色 (Researcher, Analyst, Writer...)
+- [ ] 文件预览 (代码、Markdown、图片)
+- [ ] 进度可视化
+- [ ] 项目导出/下载
+
+### Phase 3: 高级功能
+
+- [ ] 用户可自定义角色
+- [ ] Agent 记忆 (Beads 集成)
+- [ ] 技能系统 (OpenSkills 集成)
 - [ ] 多用户/团队
-- [ ] 自定义模板
-- [ ] 成本预估和控制
 
 ## 验收标准
 
-### 场景：待办清单应用
+### 场景 1: 开发应用
 
-**输入**：
-```
-做一个待办清单应用，要求：
-1. 用户注册、登录、登出
-2. 任务的增删改查
-3. 任务可以标记完成/未完成
-```
+**输入**: "做一个待办清单应用，支持登录和增删改查"
 
-**验收**：
+**预期**:
+1. 秘书分析需求，组建团队 (PM + Architect + Backend + Frontend + Tester)
+2. 在群聊中看到各 agent 的协作过程
+3. 最终产出可运行的代码
 
-| # | 检查项 | 标准 |
-|---|--------|------|
-| 1 | Plan 推送 | 手机收到 Plan，可确认/调整 |
-| 2 | 后台执行 | 确认后自动执行，不需要人盯 |
-| 3 | 进度通知 | 关键节点推送进度 |
-| 4 | 自动测试 | 测试失败自动修复 |
-| 5 | 完成通知 | 手机收到完成通知 |
-| 6 | 代码可用 | docker-compose up 可运行 |
-| 7 | 测试通过 | 所有测试用例通过 |
+### 场景 2: 调研任务
 
-## 里程碑
+**输入**: "帮我调研一下 Anthropic 这家公司"
 
-### Phase 1: 核心功能
-- 后台服务框架
-- Claude Code 集成
-- 任务队列和执行引擎
-- 自治循环（测试 → 修复）
-- CLI 客户端
-- 微信/飞书通知
+**预期**:
+1. 秘书分析后，只创建 1 个 Researcher agent
+2. Researcher 完成调研并输出报告
 
-### Phase 2: 体验优化
-- Web 界面
-- 更多通知渠道
-- 成本监控
-- 任务历史
+### 场景 3: 人工介入
 
-### Phase 3: 扩展
-- 多技术栈
-- 自定义模板
-- 团队协作
+**预期**:
+1. 用户可以在群聊中 @某个 agent 提问或指示
+2. 被 @的 agent 能响应用户的消息
 
 ---
 
 *文档更新日期：2024-12-30*
+*版本：v2.0 - 群聊协作模式*
