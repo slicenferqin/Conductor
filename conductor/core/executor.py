@@ -1,7 +1,6 @@
 """Task Executor - Orchestrates Claude Code sessions with autonomous loop."""
 
 import asyncio
-import uuid
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable
@@ -203,10 +202,13 @@ class TaskExecutor:
         self.max_fix_attempts = max_fix_attempts
         self.on_progress = on_progress
         self.claude = ClaudeCodeCLI(workspace)
-        self._session_id: str | None = None
 
     async def execute(self, plan: Plan) -> list[StageResult]:
         """Execute all stages in the plan.
+
+        Each stage runs as an independent Claude session (agent).
+        Agents communicate via the file system - each stage reads
+        outputs from previous stages and writes its own outputs.
 
         Args:
             plan: The development plan
@@ -214,9 +216,6 @@ class TaskExecutor:
         Returns:
             List of stage results
         """
-        # Generate a valid UUID session ID for this execution
-        self._session_id = str(uuid.uuid4())
-
         results: list[StageResult] = []
         stages = [s["name"] for s in plan.stages]
 
@@ -340,11 +339,8 @@ class TaskExecutor:
         )
 
     async def _execute_claude(self, prompt: str) -> list[Any]:
-        """Execute a prompt with Claude."""
-        messages = await self.claude.execute_and_wait(
-            prompt=prompt,
-            session_id=self._session_id,
-        )
+        """Execute a prompt with Claude as an independent session."""
+        messages = await self.claude.execute_and_wait(prompt=prompt)
 
         if not messages:
             raise RuntimeError("Claude CLI 未返回任何结果，请检查 claude 命令是否可用")
@@ -358,10 +354,7 @@ class TaskExecutor:
 
     async def _run_tests(self) -> dict[str, Any]:
         """Run tests and return results."""
-        messages = await self.claude.execute_and_wait(
-            prompt=TEST_PROMPT,
-            session_id=self._session_id,
-        )
+        messages = await self.claude.execute_and_wait(prompt=TEST_PROMPT)
 
         if not messages:
             return {"passed": False, "error": "Claude CLI 未返回任何结果"}
@@ -380,10 +373,7 @@ class TaskExecutor:
     async def _auto_fix(self, error: str) -> None:
         """Attempt to automatically fix an error."""
         prompt = FIX_PROMPT.format(error=error)
-        await self.claude.execute_and_wait(
-            prompt=prompt,
-            session_id=self._session_id,
-        )
+        await self.claude.execute_and_wait(prompt=prompt)
 
     def _report_progress(
         self,

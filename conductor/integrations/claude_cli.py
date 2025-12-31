@@ -16,11 +16,14 @@ class ClaudeMessage:
 
 
 class ClaudeCodeCLI:
-    """Wrapper for Claude Code CLI."""
+    """Wrapper for Claude Code CLI.
+
+    Each execution is an independent session - multi-agent collaboration
+    happens via the file system, not session continuation.
+    """
 
     def __init__(self, workspace: str) -> None:
         self.workspace = workspace
-        self._session_started: set[str] = set()  # Track which sessions have been started
 
     async def execute(
         self,
@@ -28,7 +31,10 @@ class ClaudeCodeCLI:
         session_id: str | None = None,
         allowed_tools: list[str] | None = None,
     ) -> AsyncIterator[ClaudeMessage]:
-        """Execute a prompt and stream results."""
+        """Execute a prompt and stream results.
+
+        Each call is an independent session. Agents communicate via files.
+        """
         cmd = [
             "claude",
             "--print", prompt,
@@ -37,15 +43,8 @@ class ClaudeCodeCLI:
             "--dangerously-skip-permissions",
         ]
 
-        # For session management:
-        # - First call with a session_id: use --session-id to create
-        # - Subsequent calls: use --resume to continue
-        if session_id:
-            if session_id in self._session_started:
-                cmd.extend(["--resume", session_id])
-            else:
-                cmd.extend(["--session-id", session_id])
-                self._session_started.add(session_id)
+        # Each stage is a fresh session - no session continuation
+        # Multi-agent collaboration happens via file system
 
         if allowed_tools:
             cmd.extend(["--allowedTools", ",".join(allowed_tools)])
