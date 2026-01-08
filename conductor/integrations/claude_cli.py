@@ -24,6 +24,20 @@ class ClaudeCodeCLI:
 
     def __init__(self, workspace: str) -> None:
         self.workspace = workspace
+        self._active_processes: list[asyncio.subprocess.Process] = []
+
+    async def cleanup(self) -> None:
+        """Terminate all active Claude CLI processes."""
+        for process in self._active_processes:
+            if process.returncode is None:  # Still running
+                try:
+                    process.terminate()
+                    await asyncio.wait_for(process.wait(), timeout=5.0)
+                except asyncio.TimeoutError:
+                    process.kill()
+                except Exception:
+                    pass
+        self._active_processes.clear()
 
     async def execute(
         self,
@@ -54,7 +68,12 @@ class ClaudeCodeCLI:
             cwd=self.workspace,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
+            # Increase line limit to handle large JSON output (default is 64KB)
+            limit=10 * 1024 * 1024,  # 10MB limit
         )
+
+        # Track active process for cleanup
+        self._active_processes.append(process)
 
         if process.stdout is None:
             return

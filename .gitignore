@@ -29,6 +29,7 @@ env/
 # IDE
 .idea/
 .vscode/
+.trae/
 *.swp
 *.swo
 *~
@@ -61,6 +62,7 @@ logs/
 .conductor/
 tasks/
 projects/
+data/
 
 # OS
 .DS_Store
@@ -68,3 +70,8 @@ Thumbs.db
 
 # Claude Code
 .claude/
+
+# Node
+node_modules/
+.npm/
+npm-debug.log*

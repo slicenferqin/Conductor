@@ -1,4 +1,4 @@
-"""Conductor CLI - Submit tasks, check status, pull results."""
+"""Conductor CLI - AI team collaboration tool."""
 
 import asyncio
 from datetime import datetime
@@ -13,10 +13,12 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from conductor.config import get_config
 from conductor.core.decomposer import TaskDecomposer
 from conductor.core.executor import TaskExecutor, ExecutionProgress, StageStatus
+from conductor.core.orchestrator import Orchestrator, OrchestratorConfig
+from conductor.core.models import Message
 
 app = typer.Typer(
     name="conductor",
-    help="Async AI development service - submit requirements, get working code.",
+    help="Your AI Team - Multi-agent collaboration for any task.",
     no_args_is_help=True,
 )
 console = Console()
@@ -129,6 +131,65 @@ async def _execute_plan(workspace: str, plan):
         on_progress=_progress_callback,
     )
     return await executor.execute(plan)
+
+
+def _message_callback(message: Message) -> None:
+    """Handle messages from agents."""
+    time_str = message.timestamp.strftime("%H:%M:%S")
+    # Truncate long messages for display
+    content = message.content
+    if len(content) > 500:
+        content = content[:500] + "..."
+    console.print(f"[dim][{time_str}][/dim] [bold]{message.from_name}[/bold]: {content}")
+
+
+@app.command()
+def run(
+    requirement: str = typer.Argument(..., help="What you want to accomplish"),
+    workspace: str = typer.Option(None, "--workspace", "-w", help="Project workspace directory"),
+    parallel: bool = typer.Option(False, "--parallel", "-p", help="Run agents in parallel"),
+) -> None:
+    """Run a task with AI team collaboration.
+
+    This is the new multi-agent collaboration mode where a Secretary
+    analyzes your requirement and dynamically forms a team of AI agents
+    to accomplish the task.
+
+    Examples:
+        conductor run "做一个待办清单应用"
+        conductor run "帮我调研一下 OpenAI 这家公司"
+        conductor run "分析最近的 AI 舆论趋势"
+    """
+    config = get_config()
+
+    console.print(Panel(
+        f"[bold]需求:[/bold] {requirement}",
+        title="🤖 Conductor - AI 团队协作",
+        border_style="cyan",
+    ))
+
+    # Configure orchestrator
+    orch_config = OrchestratorConfig(
+        base_workspace=workspace or str(config.workspace),
+        parallel_execution=parallel,
+    )
+
+    orchestrator = Orchestrator(
+        config=orch_config,
+        on_message=_message_callback,
+    )
+
+    # Run the collaboration
+    console.print("\n")
+    try:
+        project = asyncio.run(orchestrator.run(requirement))
+        console.print("\n" + "━" * 60)
+        console.print(f"\n[bold green]✅ 项目完成[/bold green]")
+        console.print(f"📁 项目目录: [cyan]{project.workspace}[/cyan]")
+        console.print(f"📋 项目 ID: {project.id}")
+    except Exception as e:
+        console.print(f"\n[bold red]❌ 执行失败:[/bold red] {e}")
+        raise typer.Exit(1)
 
 
 @app.command()
