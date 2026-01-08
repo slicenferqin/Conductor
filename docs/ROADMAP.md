@@ -1,115 +1,221 @@
-# Conductor Feature Roadmap
+# Conductor Roadmap
 
-## v2.1 - Multi-Agent Enhancement (Next Milestone)
+> AI 团队协作平台 - 开发路线图
 
-### 1. Git Worktree Isolation (Priority: High)
-**Description:** Each Agent works in an isolated git worktree to enable true parallel development without file conflicts.
+## 项目定位
 
-**Benefits:**
-- True parallel execution (3 tasks in parallel = 3x faster)
-- No file conflicts between agents
-- Each agent works on separate branch
-- Clean git history for code review
-- Easy merge/rebase workflow
+**Conductor vs Vibe Kanban**
 
-**Implementation:**
-```bash
-# Create worktree for each agent
-git worktree add ./agent-researcher -b feature/research
-git worktree add ./agent-frontend -b feature/frontend
-git worktree add ./agent-backend -b feature/backend
+| 维度 | Vibe Kanban | Conductor |
+|------|-------------|-----------|
+| **核心隐喻** | 看板 (Trello-like) | 群聊 (WeChat-like) |
+| **定位** | 任务管理工具 | 团队协作平台 |
+| **交互方式** | 拖拽任务卡片 | 对话式交互 |
+| **Agent 关系** | 独立执行任务 | 团队协作、@沟通 |
+| **可视化重点** | 任务状态流转 | 协作过程透明 |
+
+**差异化优势**：
+1. 群聊隐喻更直观，学习成本低
+2. Agent 团队协作，而非各干各的
+3. 秘书智能组队，动态调整
+4. 协作过程可视，而非只看结果
+
+---
+
+## 当前进度
+
+### 已完成 (v1.0)
+
+- [x] React 前端基础框架
+- [x] 项目列表 + 群聊界面
+- [x] WebSocket 实时消息推送
+- [x] 项目创建流程 (秘书分析→组队→任务分配)
+- [x] 团队面板实时状态
+- [x] 工作目录文件浏览器
+- [x] Markdown 文件渲染
+- [x] 消息置顶 (需求/任务分解)
+- [x] 秘书加入团队面板
+
+---
+
+## 开发路线图
+
+### Phase 1: 已有项目支持 (MVP) 🎯 当前目标
+
+> 让用户可以导入已有项目，进行增量开发
+
+**核心功能**：
+- [ ] 本地路径导入
+- [ ] 快速扫描 (目录结构 + 技术栈识别)
+- [ ] 项目列表区分"新建"和"导入"
+- [ ] 导入项目的聊天界面
+
+**UI 变更**：
+- [ ] 新建项目按钮改为下拉菜单 (新建 / 导入)
+- [ ] 导入弹窗 (路径输入 + 分析模式选择)
+- [ ] 项目卡片显示"已导入"标签
+
+**预计工作量**：3-5 天
+
+---
+
+### Phase 2: Git Worktree 隔离
+
+> 多 Agent 并行工作，互不干扰
+
+**技术方案**：
+```
+主仓库/
+├── .git/                    # 共享 git 数据库
+└── src/
+
+worktrees/
+├── agent-backend/           # Backend Agent worktree
+│   └── (独立工作目录)
+├── agent-frontend/          # Frontend Agent worktree
+│   └── (独立工作目录)
+└── agent-tester/            # Tester Agent worktree
+    └── (独立工作目录)
 ```
 
-**Tasks:**
-- [ ] Modify `Agent` class to create git worktree on init
-- [ ] Update `Orchestrator` to manage worktrees
-- [ ] Implement automatic PR creation on task completion
-- [ ] Add one-click merge/rebase in UI
+**实现任务**：
+- [ ] Agent 启动时创建 worktree
+- [ ] 每个 Agent 在独立分支工作
+- [ ] 任务完成后自动创建 PR
+- [ ] UI 展示各分支状态
+- [ ] 一键合并功能
+
+**核心价值**：
+- 真正的并行执行 (3个任务并行 = 3倍速度)
+- 无文件冲突
+- 清晰的 git 历史
+- 方便 code review
 
 ---
 
-### 2. Kanban View (Priority: Medium)
-**Description:** Add a visual Kanban board view for task management alongside the chat view.
+### Phase 3: Beads 记忆系统集成
 
-**Features:**
-- Columns: Backlog → In Progress → Review → Done
-- Drag-and-drop task prioritization
-- Visual agent status indicators
-- Task dependency visualization
+> Agent 跨会话记忆，不再"失忆"
 
-**Tasks:**
-- [ ] Create `KanbanBoard` component
-- [ ] Add task model with status field
-- [ ] Implement drag-and-drop with `@dnd-kit/core`
-- [ ] Add view toggle (Chat / Kanban) in header
+**集成方案**：
+```
+项目导入 → 深度分析 → 生成 .beads/
+                         ├── project-memory.bead
+                         ├── architecture.bead
+                         ├── code-style.bead
+                         └── history.bead
+
+后续任务 → 加载 .beads/ → Agent 理解上下文
+任务完成 → 更新 .beads/ → 记录决策和变更
+```
+
+**实现任务**：
+- [ ] 研究 Beads 项目结构和 API
+- [ ] 实现 Beads 生成器 (深度分析时)
+- [ ] 实现 Beads 加载器 (Agent 启动时)
+- [ ] 实现 Beads 更新器 (任务完成时)
+
+**核心价值**：
+- 跨会话一致性
+- 避免重复分析
+- 新 Agent 快速上手
 
 ---
 
-### 3. Multi-Agent Backend Support (Priority: Medium)
-**Description:** Support multiple AI coding agents beyond Claude CLI.
+### Phase 4: OpenSkills 技能库集成
 
-**Supported Agents:**
-- [x] Claude Code (current)
+> Agent 按最佳实践执行任务
+
+**集成方案**：
+```bash
+openskills install react-component
+openskills install fastapi-crud
+openskills sync --output ./SKILLS.md
+
+Agent 执行时 → 加载相关技能 → 按规范输出
+```
+
+**实现任务**：
+- [ ] 研究 OpenSkills API
+- [ ] 实现技能匹配 (任务类型 → 相关技能)
+- [ ] 技能注入 Agent prompt
+- [ ] 支持自定义技能
+
+**核心价值**：
+- 复用社区最佳实践
+- 保证代码质量一致性
+- 支持公司内部规范
+
+---
+
+### Phase 5: 增量开发完善
+
+> 在已有代码上工作，而非从零开始
+
+**实现任务**：
+- [ ] Agent 修改现有文件 (而非只创建新文件)
+- [ ] 代码风格遵循 (基于 Beads)
+- [ ] 变更汇总展示 (Diff 视图)
+- [ ] 现有测试验证 (确保不破坏功能)
+
+---
+
+### Phase 6: Git 工作流集成
+
+> 从开发到 PR 的完整闭环
+
+**实现任务**：
+- [ ] 自动创建 feature 分支
+- [ ] 自动生成 commit message
+- [ ] 一键创建 PR
+- [ ] PR 模板 (变更摘要 + 测试结果)
+- [ ] 更新 Beads 历史记录
+
+---
+
+### Phase 7: 持久化存储
+
+> 项目和消息持久化
+
+**实现任务**：
+- [ ] SQLite 存储 (本地版)
+- [ ] 项目/消息/团队配置持久化
+- [ ] 消息分页加载
+- [ ] 项目归档功能
+
+---
+
+### Phase 8: 多 Agent 后端支持
+
+> 支持更多 AI 编程助手
+
+**计划支持**：
+- [x] Claude Code (当前)
 - [ ] Gemini CLI
 - [ ] OpenAI Codex
-- [ ] Cursor CLI
-- [ ] Local models (Ollama)
-
-**Implementation:**
-- Create `AgentBackend` interface
-- Implement adapters for each agent type
-- Add agent selection in project settings
+- [ ] Cursor
+- [ ] 本地模型 (Ollama)
 
 ---
 
-### 4. VS Code Extension (Priority: Low)
-**Description:** Bring Conductor into the IDE with a VS Code extension.
+## 技术债务
 
-**Features:**
-- View agent status in sidebar
-- Quick task creation
-- Real-time message notifications
-- Jump to file from chat messages
-
----
-
-## v2.2 - Persistence & Reliability
-
-### 5. Database Persistence
-**Description:** Move from in-memory storage to persistent database.
-
-**Tasks:**
-- [ ] Add SQLite/PostgreSQL support
-- [ ] Persist projects, messages, team configs
-- [ ] Implement message pagination
-- [ ] Add project history/archive
-
-### 6. Session Recovery
-**Description:** Allow resuming paused projects by restoring agent sessions.
-
-**Tasks:**
-- [ ] Save agent session_id to persistent storage
-- [ ] Implement `--resume` flag usage for Claude CLI
-- [ ] Track task execution progress
-- [ ] Add checkpoint/restore mechanism
+- [ ] 单元测试覆盖
+- [ ] E2E 测试 (Playwright)
+- [ ] 错误处理完善
+- [ ] 日志系统
+- [ ] 性能优化 (大项目)
 
 ---
 
-## v2.3 - Collaboration & Sharing
+## 参考项目
 
-### 7. GitHub Integration
-- Auto-create PRs on task completion
-- Link commits to agent messages
-- PR review workflow in UI
-
-### 8. Team Collaboration
-- Multiple users per project
-- Role-based access control
-- Real-time collaboration
+| 项目 | 用途 | 链接 |
+|------|------|------|
+| Beads | Agent 记忆系统 | https://github.com/steveyegge/beads |
+| OpenSkills | 通用技能库 | https://github.com/numman-ali/openskills |
+| Vibe Kanban | 设计参考 | https://github.com/BloopAI/vibe-kanban |
 
 ---
 
-## References
-
-- [Vibe Kanban](https://github.com/BloopAI/vibe-kanban) - Inspiration for git worktree isolation
-- [Claude Agent SDK](https://github.com/anthropics/claude-code) - Agent framework
+*更新日期: 2025-01-08*
